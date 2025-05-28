@@ -1,10 +1,10 @@
-# 🔁 Clone and Run Postman Project
+# Clone and Run Postman Project
 
-This guide explains how to clone the Postman collection repository and import it into Postman to run the requests.
+
 
 ---
 
-## 🔧 Prerequisites
+## Prerequisites
 
 - [Git](https://git-scm.com/downloads) installed on your machine.
 - [Postman](https://www.postman.com/downloads/) installed and logged in.
