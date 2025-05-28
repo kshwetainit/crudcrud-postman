@@ -2,7 +2,7 @@
 
 
 
----
+CRUDcrud Employee API Automation.postman_collection
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@
 - [Postman](https://www.postman.com/downloads/) installed and logged in.
 - open https://crudcrud.com/ and copy the base url something like https://crudcrud.com/api/33eaf5b8a9054e8f858d54abab081744
 
----
+CRUDcrud Employee API Automation.postman_collection
 
 ## Step 1: Clone the Repository
 
@@ -25,7 +25,7 @@
 
 4. This will create a folder named **`crudcrud-postman`** inside `C:\temp`.
 
---- 
+CRUDcrud Employee API Automation.postman_collection 
 
 ## Step 2: Locate the Postman Collection
 
@@ -33,7 +33,7 @@ Navigate to the cloned `crudcrud-postman` folder. You will typically find:
 
 - A Postman Collection file: `CRUDcrud Employee API Automation.postman_collection.json`
 
----
+CRUDcrud Employee API Automation.postman_collection
 
 ## Step 3: Import into Postman
 
@@ -44,14 +44,14 @@ Navigate to the cloned `crudcrud-postman` folder. You will typically find:
 5. Select the collection file (`CRUDcrud Employee API Automation.postman_collection.json`) and click **Open**.
 6. If there's an environment file, import it the same way under the **"Environments"** tab.
 
----
+CRUDcrud Employee API Automation.postman_collection
 
 ## Step 4: Set Up the variables
 
 1. In Postman, access "Variables in request"
 2. update the base URL with the current and active URL
 3. Add test data for the request.
----
+CRUDcrud Employee API Automation.postman_collection
 
 ## Step 5: Run the Collection
 
@@ -59,4 +59,4 @@ Navigate to the cloned `crudcrud-postman` folder. You will typically find:
 2. Click on any request to run it manually.
 3. Or click the **"Runner"** (top-right or bottom-right), select the collection, and click **Run** to execute all requests.
 
----
+CRUDcrud Employee API Automation.postman_collection
