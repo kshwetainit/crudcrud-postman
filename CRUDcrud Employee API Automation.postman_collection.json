@@ -1,0 +1,668 @@
+{
+	"info": {
+		"_postman_id": "109ababe-58d6-467b-b3f1-8c0548992df8",
+		"name": "CRUDcrud Employee API Automation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "45365057",
+		"_collection_link": "https://shweta-2704970.postman.co/workspace/Shweta's-Workspace~887e1740-89a0-4dc3-89c7-30a59fcf1732/collection/45365057-109ababe-58d6-467b-b3f1-8c0548992df8?action=share&source=collection_link&creator=45365057"
+	},
+	"item": [
+		{
+			"name": "1. Positive Scenarios",
+			"item": [
+				{
+					"name": "Create Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Create Employee (POST) request",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Assert that _id is present and is a string",
+									"pm.test(\"Response has _id and it's a string\", function () {",
+									"    pm.expect(jsonData).to.have.property('_id').and.to.be.a('string');",
+									"});",
+									"",
+									"// Store the _id and Email for subsequent requests",
+									"pm.environment.set(\"employeeId\", jsonData._id);",
+									"pm.environment.set(\"employeeEmail\", jsonData.Email);",
+									"",
+									"// Assert that the returned data matches the sent data (excluding _id)",
+									"pm.test(\"Returned FirstName matches sent FirstName\", function () {",
+									"    pm.expect(jsonData.FirstName).to.eql(pm.request.body.raw ? JSON.parse(pm.request.body.raw).FirstName : pm.iterationData.get(\"FirstName\"));",
+									"});",
+									"pm.test(\"Returned LastName matches sent LastName\", function () {",
+									"    pm.expect(jsonData.LastName).to.eql(pm.request.body.raw ? JSON.parse(pm.request.body.raw).LastName : pm.iterationData.get(\"LastName\"));",
+									"});",
+									"",
+									"// Schema Validation",
+									"const employeeSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"_id\": { \"type\": \"string\" },",
+									"        \"FirstName\": { \"type\": \"string\" },",
+									"        \"LastName\": { \"type\": \"string\" },",
+									"        \"DateOfBirth\": { \"type\": \"string\", \"format\": \"date\" },",
+									"        \"StartDate\": { \"type\": \"string\", \"format\": \"date\" },",
+									"        \"Department\": { \"type\": \"string\" },",
+									"        \"JobTitle\": { \"type\": \"string\" },",
+									"        \"Email\": { \"type\": \"string\", \"format\": \"email\" },",
+									"        \"Mobile\": { \"type\": \"string\" },",
+									"        \"Address\": { \"type\": \"string\" },",
+									"        \"BaseSalary\": { \"type\": \"number\" }",
+									"    },",
+									"    \"required\": [\"_id\", \"FirstName\", \"LastName\", \"DateOfBirth\", \"StartDate\", \"Department\", \"JobTitle\", \"Email\", \"Mobile\", \"Address\", \"BaseSalary\"],",
+									"    \"additionalProperties\": false",
+									"};",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    const Ajv = require('ajv');",
+									"    const ajv = new Ajv({ allErrors: true, formats: {",
+									"        date: /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/,",
+									"        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
+									"    }});",
+									"    const validate = ajv.compile(employeeSchema);",
+									"    const isValid = validate(jsonData);",
+									"",
+									"    if (!isValid) {",
+									"        console.log(validate.errors);",
+									"    }",
+									"    pm.expect(isValid, \"Response schema validation failed\").to.be.true;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"FirstName\": \"{{FirstName}}\",\n    \"LastName\": \"{{LastName}}\",\n    \"DateOfBirth\": \"{{DateOfBirth}}\",\n    \"StartDate\": \"{{StartDate}}\",\n    \"Department\": \"{{Department}}\",\n    \"JobTitle\": \"{{JobTitle}}\",\n    \"Email\": \"{{Email}}\",\n    \"Mobile\": \"{{Mobile}}\",\n    \"Address\": \"{{Address}}\",\n    \"BaseSalary\": {{BaseSalary}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{crudCrudBaseUrl}}/employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Employees",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Get All Employees (GET) request",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Assert that the response is an array",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.expect(Array.isArray(jsonData)).to.be.true;",
+									"});",
+									"",
+									"// Assert that the created employee is present in the list",
+									"pm.test(\"Created employee is in the list\", function () {",
+									"    const employeeEmail = pm.environment.get(\"employeeEmail\");",
+									"    const foundEmployee = jsonData.find(emp => emp.Email === employeeEmail);",
+									"    pm.expect(foundEmployee).to.be.an('object');",
+									"    pm.expect(foundEmployee._id).to.eql(pm.environment.get(\"employeeId\"));",
+									"});",
+									"",
+									"// Schema Validation for array of employees",
+									"const employeeSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"_id\": { \"type\": \"string\" },",
+									"        \"FirstName\": { \"type\": \"string\" },",
+									"        \"LastName\": { \"type\": \"string\" },",
+									"        \"DateOfBirth\": { \"type\": \"string\", \"format\": \"date\" },",
+									"        \"StartDate\": { \"type\": \"string\", \"format\": \"date\" },",
+									"        \"Department\": { \"type\": \"string\" },",
+									"        \"JobTitle\": { \"type\": \"string\" },",
+									"        \"Email\": { \"type\": \"string\", \"format\": \"email\" },",
+									"        \"Mobile\": { \"type\": \"string\" },",
+									"        \"Address\": { \"type\": \"string\" },",
+									"        \"BaseSalary\": { \"type\": \"number\" }",
+									"    },",
+									"    \"required\": [\"_id\", \"FirstName\", \"LastName\", \"DateOfBirth\", \"StartDate\", \"Department\", \"JobTitle\", \"Email\", \"Mobile\", \"Address\", \"BaseSalary\"],",
+									"    \"additionalProperties\": false",
+									"};",
+									"",
+									"const employeesArraySchema = {",
+									"    \"type\": \"array\",",
+									"    \"items\": employeeSchema",
+									"};",
+									"",
+									"pm.test(\"Array schema is valid\", function () {",
+									"    const Ajv = require('ajv');",
+									"    const ajv = new Ajv({ allErrors: true, formats: {",
+									"        date: /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/,",
+									"        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
+									"    }});",
+									"    const validate = ajv.compile(employeesArraySchema);",
+									"    const isValid = validate(jsonData);",
+									"",
+									"    if (!isValid) {",
+									"        console.log(validate.errors);",
+									"    }",
+									"    pm.expect(isValid, \"Response array schema validation failed\").to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{crudCrudBaseUrl}}/employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Get Employee by ID (GET) request",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const jsonData = pm.response.json();",
+									"",
+									"// Assert that the returned _id matches the requested _id",
+									"pm.test(\"Returned _id matches requested _id\", function () {",
+									"    pm.expect(jsonData._id).to.eql(pm.environment.get(\"employeeId\"));",
+									"});",
+									"",
+									"// Assert that some key fields match the original data",
+									"pm.test(\"Returned Email matches original Email\", function () {",
+									"    pm.expect(jsonData.Email).to.eql(pm.environment.get(\"employeeEmail\"));",
+									"});",
+									"",
+									"// Schema Validation",
+									"const employeeSchema = {",
+									"    \"type\": \"object\",",
+									"    \"properties\": {",
+									"        \"_id\": { \"type\": \"string\" },",
+									"        \"FirstName\": { \"type\": \"string\" },",
+									"        \"LastName\": { \"type\": \"string\" },",
+									"        \"DateOfBirth\": { \"type\": \"string\", \"format\": \"date\" },",
+									"        \"StartDate\": { \"type\": \"string\", \"format\": \"date\" },",
+									"        \"Department\": { \"type\": \"string\" },",
+									"        \"JobTitle\": { \"type\": \"string\" },",
+									"        \"Email\": { \"type\": \"string\", \"format\": \"email\" },",
+									"        \"Mobile\": { \"type\": \"string\" },",
+									"        \"Address\": { \"type\": \"string\" },",
+									"        \"BaseSalary\": { \"type\": \"number\" }",
+									"    },",
+									"    \"required\": [\"_id\", \"FirstName\", \"LastName\", \"DateOfBirth\", \"StartDate\", \"Department\", \"JobTitle\", \"Email\", \"Mobile\", \"Address\", \"BaseSalary\"],",
+									"    \"additionalProperties\": false",
+									"};",
+									"",
+									"pm.test(\"Schema is valid\", function () {",
+									"    const Ajv = require('ajv');",
+									"    const ajv = new Ajv({ allErrors: true, formats: {",
+									"        date: /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/,",
+									"        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/",
+									"    }});",
+									"    const validate = ajv.compile(employeeSchema);",
+									"    const isValid = validate(jsonData);",
+									"",
+									"    if (!isValid) {",
+									"        console.log(validate.errors);",
+									"    }",
+									"    pm.expect(isValid, \"Response schema validation failed\").to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{crudCrudBaseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Update Employee (PUT) request",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Verify that the response body is empty (as crudcrud.com PUT returns empty 200)",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});",
+									"",
+									"// Now, send a GET request to verify the update",
+									"pm.sendRequest({",
+									"    url: pm.environment.get(\"crudCrudBaseUrl\") + \"/employees/\" + pm.environment.get(\"employeeId\"),",
+									"    method: 'GET'",
+									"}, function (err, res) {",
+									"    if (err) {",
+									"        console.error(err);",
+									"        pm.test(\"Failed to verify update\", false);",
+									"        return;",
+									"    }",
+									"    pm.test(\"Verification GET status code is 200\", function () {",
+									"        pm.expect(res.status).to.eql(200);",
+									"    });",
+									"    const updatedData = res.json();",
+									"    pm.test(\"JobTitle is updated\", function () {",
+									"        pm.expect(updatedData.JobTitle).to.eql(\"Senior Software Engineer\");",
+									"    });",
+									"    pm.test(\"BaseSalary is updated\", function () {",
+									"        pm.expect(updatedData.BaseSalary).to.eql(90000.00);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"FirstName\": \"{{FirstName}}\",\n    \"LastName\": \"{{LastName}}\",\n    \"DateOfBirth\": \"{{DateOfBirth}}\",\n    \"StartDate\": \"{{StartDate}}\",\n    \"Department\": \"Engineering\",\n    \"JobTitle\": \"Senior Software Engineer\",\n    \"Email\": \"{{Email}}\",\n    \"Mobile\": \"1234567890\",\n    \"Address\": \"123 Main St, Anytown\",\n    \"BaseSalary\": 90000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{crudCrudBaseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Delete Employee (DELETE) request",
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Verify that the response body is empty (as crudcrud.com DELETE returns empty 200)",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});",
+									"",
+									"// Now, send a GET request to verify the deletion (expect 404 Not Found)",
+									"pm.sendRequest({",
+									"    url: pm.environment.get(\"crudCrudBaseUrl\") + \"/employees/\" + pm.environment.get(\"employeeId\"),",
+									"    method: 'GET'",
+									"}, function (err, res) {",
+									"    if (err) {",
+									"        console.error(err);",
+									"        pm.test(\"Failed to verify deletion\", false);",
+									"        return;",
+									"    }",
+									"    pm.test(\"Verification GET status code is 404 Not Found\", function () {",
+									"        pm.expect(res.status).to.eql(404);",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{crudCrudBaseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Negative Scenarios",
+			"item": [
+				{
+					"name": "Create Employee - Missing Required Field",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Create Employee with missing field (POST) request",
+									"// crudcrud.com is quite permissive; it might create with nulls or ignore. ",
+									"// This test assumes it might return a 400 or still create successfully.",
+									"// Adjust assertion based on actual API behavior.",
+									"// Test script for Create Employee (POST) request",
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Status code is 400 Bad Request or 201 Created\", function () {",
+									"    // crudcrud.com often creates even with missing fields, setting them to null.",
+									"    // If it were a stricter API, we'd expect 400.",
+									"    pm.expect(pm.response.status).to.be.oneOf([201, 400]);",
+									"});",
+									"",
+									"if (pm.response.code === 201) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.test(\"FirstName is null or missing\", function () {",
+									"        pm.expect(jsonData.FirstName).to.be.oneOf([null, undefined]);",
+									"    });",
+									"    // Clean up the created resource if it was successful",
+									"    pm.sendRequest({",
+									"        url: pm.environment.get(\"crudCrudBaseUrl\") + \"/employees/\" + jsonData._id,",
+									"        method: 'DELETE'",
+									"    }, function (err, res) {",
+									"        if (err) console.error(\"Cleanup failed for negative create test:\", err);",
+									"    });",
+									"}",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"LastName\": \"NegativeTest\",\n    \"DateOfBirth\": \"1995-03-25\",\n    \"StartDate\": \"2021-01-01\",\n    \"Department\": \"QA\",\n    \"JobTitle\": \"Test Engineer\",\n    \"Email\": \"negative.test@example.com\",\n    \"Mobile\": \"1112223333\",\n    \"Address\": \"789 Test St, Testville\",\n    \"BaseSalary\": 60000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{crudCrudBaseUrl}}/employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by ID - Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Get Employee by ID - Not Found (GET) request",
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{crudCrudBaseUrl}}/employees/60c728e0e7b8c9d0f1a2b3c4"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee - Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Update Employee - Not Found (PUT) request",
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"FirstName\": \"NonExistent\",\n    \"LastName\": \"Employee\",\n    \"DateOfBirth\": \"1990-01-01\",\n    \"StartDate\": \"2020-01-01\",\n    \"Department\": \"IT\",\n    \"JobTitle\": \"Ghost\",\n    \"Email\": \"ghost@example.com\",\n    \"Mobile\": \"0000000000\",\n    \"Address\": \"Nowhere\",\n    \"BaseSalary\": 10000.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{crudCrudBaseUrl}}/employees/60c728e0e7b8c9d0f1a2b3c4"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee - Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test script for Delete Employee - Not Found (DELETE) request",
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{crudCrudBaseUrl}}/employees/60c728e0e7b8c9d0f1a2b3c4"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Employee - Already Deleted",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// This test requires a resource to be deleted first.",
+									"// For demonstration, we'll create and immediately delete, then try to delete again.",
+									"// This is a simplified example; in a real suite, you'd manage state more robustly.",
+									"",
+									"// Step 1: Create an employee to delete",
+									"pm.sendRequest({",
+									"    url: pm.environment.get(\"crudCrudBaseUrl\") + \"/employees\",",
+									"    method: 'POST',",
+									"    header: { 'Content-Type': 'application/json' },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            \"FirstName\": \"Temp\",",
+									"            \"LastName\": \"Delete\",",
+									"            \"DateOfBirth\": \"1990-01-01\",",
+									"            \"StartDate\": \"2020-01-01\",",
+									"            \"Department\": \"Temp\",",
+									"            \"JobTitle\": \"Temp\",",
+									"            \"Email\": \"temp.delete@example.com\",",
+									"            \"Mobile\": \"1111111111\",",
+									"            \"Address\": \"Temp\",",
+									"            \"BaseSalary\": 10000.00",
+									"        })",
+									"    }",
+									"}, function (err, createRes) {",
+									"    if (err || createRes.status !== 201) {",
+									"        console.error(\"Failed to create temp employee for 'Already Deleted' test:\", err || createRes.text());",
+									"        pm.test(\"Failed to setup 'Already Deleted' test\", false);",
+									"        return;",
+									"    }",
+									"    const tempEmployeeId = createRes.json()._id;",
+									"    console.log(\"Temp employee created with ID:\", tempEmployeeId);",
+									"",
+									"    // Step 2: Delete the employee",
+									"    pm.sendRequest({",
+									"        url: pm.environment.get(\"crudCrudBaseUrl\") + \"/employees/\" + tempEmployeeId,",
+									"        method: 'DELETE'",
+									"    }, function (err, deleteRes1) {",
+									"        if (err || deleteRes1.status !== 200) {",
+									"            console.error(\"Failed to delete temp employee for 'Already Deleted' test (first attempt):\");",
+									"            pm.test(\"Failed to setup 'Already Deleted' test\", false);",
+									"            return;",
+									"        }",
+									"        console.log(\"Temp employee deleted successfully (first attempt)\");",
+									"",
+									"        // Step 3: Attempt to delete the employee again (expect 404)",
+									"        pm.sendRequest({",
+									"            url: pm.environment.get(\"crudCrudBaseUrl\") + \"/employees/\" + tempEmployeeId,",
+									"            method: 'DELETE'",
+									"        }, function (err, deleteRes2) {",
+									"            if (err) {",
+									"                console.error(\"Error on second delete attempt:\", err);",
+									"                pm.test(\"Second delete attempt failed due to network error\", false);",
+									"                return;",
+									"            }",
+									"            pm.test(\"Status code for second delete attempt is 404 Not Found\", function () {",
+									"                pm.expect(deleteRes2.status).to.eql(404);",
+									"            });",
+									"            pm.test(\"Response body is empty on second delete attempt\", function () {",
+									"                pm.expect(deleteRes2.text()).to.be.empty;",
+									"            });",
+									"            console.log(\"Second delete attempt resulted in 404 as expected.\");",
+									"        });",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{crudCrudBaseUrl}}/employees/{{employeeId}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "0. Setup: Get Dynamic Base URL",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Test script to extract the dynamic base URL from crudcrud.com homepage",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const html = pm.response.text();",
+							"// Regex to find the API endpoint URL, e.g., https://crudcrud.com/api/xxxxxxxxxxxxxxxxxxxxxxxx",
+							"const regex = /https:\\/\\/crudcrud\\.com\\/api\\/[a-f0-9]{24}/;",
+							"const match = html.match(regex);",
+							"",
+							"if (match && match[0]) {",
+							"    const baseUrl = match[0];",
+							"    pm.environment.set(\"crudCrudBaseUrl\", baseUrl);",
+							"    console.log(\"Dynamic Base URL set to: \", baseUrl);",
+							"    pm.test(\"Dynamic Base URL found and set\", () => {",
+							"        pm.expect(baseUrl).to.be.a('string').and.to.have.lengthOf(49); // Example length for a valid URL",
+							"    });",
+							"} else {",
+							"    console.error(\"Could not find dynamic base URL in crudcrud.com homepage. Please check the website structure.\");",
+							"    pm.environment.set(\"crudCrudBaseUrl\", \"URL_NOT_FOUND\"); // Set a placeholder for error",
+							"    pm.test(\"Dynamic Base URL not found\", () => {",
+							"        pm.expect.fail(\"Dynamic Base URL could not be extracted.\");",
+							"    });",
+							"}",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "https://crudcrud.com/"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "crudCrudBaseUrl",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
