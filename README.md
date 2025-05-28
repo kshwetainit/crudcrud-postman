@@ -60,7 +60,3 @@ Navigate to the cloned `crudcrud-postman` folder. You will typically find:
 3. Or click the **"Runner"** (top-right or bottom-right), select the collection, and click **Run** to execute all requests.
 
 ---
-
-## Done!
-
-You have successfully cloned the Postman project and run the API collection. You can now test, edit, or extend the requests as needed.
