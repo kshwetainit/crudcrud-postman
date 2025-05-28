@@ -25,7 +25,7 @@ This guide explains how to clone the Postman collection repository and import it
 
 4. This will create a folder named **`crudcrud-postman`** inside `C:\temp`.
 
----
+--- 
 
 ## Step 2: Locate the Postman Collection
 
